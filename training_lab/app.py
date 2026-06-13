@@ -73,7 +73,7 @@ def start_training(spec_json, optimizer, lr, max_epochs, momentum, weight_decay,
     except Exception as e:
         return f"Spec parse error: {e}"
     try:
-        model = SandwichModel(spec).to(device)
+        model = SandwichModel(spec).to(state["device"])
     except ValueError as e:
         return f"Model build error: {e}"
 
