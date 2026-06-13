@@ -53,7 +53,18 @@ python main.py                 # local + public gradio.live link
 python main.py --no-share      # local only (no public link)
 python main.py --port 8080     # custom port
 python main.py --host 0.0.0.0  # bind on all interfaces
+python main.py --verbose       # show all warnings (don't silence noise)
 ```
+
+If the preferred port is busy, the app automatically falls back to the next
+free port instead of failing. Press Ctrl-C in the terminal to stop the server
+cleanly and release the port.
+
+For UI development with auto-reload on file changes, use the Gradio CLI:
+
+​```bash
+gradio dev.py
+​```
 
 ### Running on Google Colab
 

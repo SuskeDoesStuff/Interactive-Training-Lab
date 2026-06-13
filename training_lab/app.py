@@ -2,7 +2,7 @@
 main() entrypoint that wires data + device and launches the app."""
 import json
 import threading
-
+import warnings
 import gradio as gr
 import torch
 
@@ -264,7 +264,16 @@ def build_demo():
     return demo
 
 
-def main(share=True, server_name="127.0.0.1", server_port=7860, debug=False):
+def quiet_warnings():
+    """Silence known third-party noise (not our own warnings)."""
+    warnings.filterwarnings("ignore", message=r".*HTTP_422_UNPROCESSABLE_ENTITY.*")
+    warnings.filterwarnings("ignore", message=r".*Cache entry deserialization failed.*")
+
+
+def setup_state():
+    """Populate shared runtime state (seed, device, data loaders). Idempotent."""
+    if state["device"] is not None and state["train_loader"] is not None:
+        return
     set_seed()
     device = get_device()
     print(f"Device: {device}")
@@ -275,6 +284,38 @@ def main(share=True, server_name="127.0.0.1", server_port=7860, debug=False):
     state["train_loader"] = train_loader
     state["test_loader"] = test_loader
     state["device"] = device
+
+
+def _launch_with_fallback(demo, share, server_name, server_port, debug, max_tries=10):
+    """Launch on server_port; if busy, try the next ports in turn."""
+    for i in range(max_tries):
+        port = server_port + i
+        try:
+            demo.launch(theme=gr.themes.Soft(), share=share,
+                        server_name=server_name, server_port=port, debug=debug)
+            return
+        except OSError as e:
+            if "port" in str(e).lower() and i < max_tries - 1:
+                print(f"Port {port} is busy, trying {port + 1}...")
+                continue
+            raise
+
+
+def main(share=True, server_name="127.0.0.1", server_port=7860, debug=False,
+         verbose=False):
+    if not verbose:
+        quiet_warnings()
+    setup_state()
     demo = build_demo()
-    demo.launch(theme=gr.themes.Soft(), share=share,
-                server_name=server_name, server_port=server_port, debug=debug)
+    try:
+        _launch_with_fallback(demo, share, server_name, server_port, debug)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        if state.get("controls") is not None:
+            state["controls"].stop()
+        try:
+            demo.close()
+        except Exception:
+            pass
+        print("\nServer stopped, port released.")
