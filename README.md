@@ -39,6 +39,8 @@ That prints a local URL and a public `gradio.live` link, and opens the dashboard
 ```bash
 git clone <your-repo-url>
 cd interactive-training-lab
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 python main.py
 ```
@@ -73,8 +75,6 @@ Set the runtime to a GPU (Runtime → Change runtime type → T4 GPU), then:
 ```python
 !git clone <your-repo-url>
 %cd interactive-training-lab
-!python3 -m venv .venv
-!source .venv/bin/activate
 !pip install -q -r requirements.txt
 !python main.py
 ```
