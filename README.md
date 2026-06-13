@@ -5,6 +5,8 @@ layer spec, watch it train in real time, hot-swap optimizers and learning rates
 mid-run, then replay the whole experiment and generate a report — all from a
 Gradio web UI.
 
+![UI](assets/UI.png)
+
 ```bash
 python main.py
 ```
@@ -33,6 +35,9 @@ That prints a local URL and a public `gradio.live` link, and opens the dashboard
   "phases" and quantifies how each change moved train loss and test accuracy.
   Exports to self-contained HTML (with the interactive chart embedded) and raw
   JSON (the full event log).
+
+![Live Training](assets/train.png)
+![Prediction](assets/predict.png)
 
 ## Quick start
 
